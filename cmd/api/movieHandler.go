@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -37,7 +36,6 @@ func (app *application) fetchAllMovies(wr http.ResponseWriter, r *http.Request) 
 		app.logger.Fatalf("Error while quering data: %v", err)
 		return
 	}
-	fmt.Println(movies)
 	err = app.writeJSON(wr, http.StatusOK, movies, "movies")
 	if err != nil {
 		app.logger.Fatalf("Error while writing response: %v", err)
