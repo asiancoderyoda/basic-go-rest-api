@@ -43,6 +43,17 @@ func (app *application) fetchAllMovies(wr http.ResponseWriter, r *http.Request) 
 	}
 }
 
+func (app application) fetchAllGenres(wr http.ResponseWriter, r *http.Request) {
+	genres, err := app.models.DB.GetAllGenres()
+	if err != nil {
+		app.logger.Fatalf("Error while quering data: %v", err)
+	}
+	err = app.writeJSON(wr, http.StatusOK, genres, "genres")
+	if err != nil {
+		app.logger.Fatalf("Error while writing response: %v", err)
+	}
+}
+
 func (app *application) insertMovie(wr http.ResponseWriter, r *http.Request) {
 	// var movie Movie
 	// err := json.NewDecoder(r.Body).Decode(&movie)

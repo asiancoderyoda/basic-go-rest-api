@@ -146,3 +146,30 @@ func (db *DBModel) GetAllMovie() ([]*Movie, error) {
 
 	return movies, nil
 }
+
+func (db *DBModel) GetAllGenres() ([]*Genre, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := `
+		SELECT id, genre_name, created_at, updated_at
+		FROM public.genres;
+	`
+	rows, _ := db.DB.QueryContext(ctx, query)
+
+	genres := make([]*Genre, 0)
+	for rows.Next() {
+		var genre Genre
+		err := rows.Scan(
+			&genre.ID,
+			&genre.GenreName,
+			&genre.CreatedAt,
+			&genre.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		genres = append(genres, &genre)
+	}
+	return genres, nil
+}
