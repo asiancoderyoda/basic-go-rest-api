@@ -43,7 +43,7 @@ func (app *application) fetchAllMovies(wr http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (app *application) createMovies(wr http.ResponseWriter, r *http.Request) {
+func (app *application) insertMovie(wr http.ResponseWriter, r *http.Request) {
 	// var movie Movie
 	// err := json.NewDecoder(r.Body).Decode(&movie)
 	// if err != nil {
@@ -63,4 +63,16 @@ func (app *application) createMovies(wr http.ResponseWriter, r *http.Request) {
 	// 	app.logger.Fatalf("Error while writing response: %v", err)
 	// 	return
 	// }
+}
+
+func (app *application) updateMovie(wr http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *application) deleteMovie(wr http.ResponseWriter, r *http.Request) {
+
+}
+
+func (app *application) searchMovies(wr http.ResponseWriter, r *http.Request) {
+
 }
