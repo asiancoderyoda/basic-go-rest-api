@@ -2,14 +2,13 @@ package models
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/jackc/pgx/v4"
 )
 
 type DBModel struct {
-	DB *pgx.Conn
+	DB *sql.DB
 }
 
 func (db *DBModel) GetMovieById(id int) (*Movie, error) {
@@ -20,7 +19,7 @@ func (db *DBModel) GetMovieById(id int) (*Movie, error) {
 	SELECT id, title, description, year, release_date, runtime, rating, mpaa_rating, created_at, updated_at
 	FROM public.movie_entity WHERE id = $1;
 	`
-	row := db.DB.QueryRow(ctx, queryMovie, id)
+	row := db.DB.QueryRowContext(ctx, queryMovie, id)
 
 	var movie Movie
 
@@ -38,7 +37,7 @@ func (db *DBModel) GetMovieById(id int) (*Movie, error) {
 	)
 
 	if err != nil {
-		if err == pgx.ErrNoRows {
+		if err == sql.ErrNoRows {
 			fmt.Println("No movie found with id: ", id)
 			return nil, nil
 		}
@@ -51,7 +50,7 @@ func (db *DBModel) GetMovieById(id int) (*Movie, error) {
 	LEFT JOIN genres g on (mg.genre_id = g.id)
 	WHERE mg.movie_id = $1;
 	`
-	rows, _ := db.DB.Query(ctx, queryGenre, id)
+	rows, _ := db.DB.QueryContext(ctx, queryGenre, id)
 	defer rows.Close()
 
 	genres := make(map[int]string)
@@ -84,7 +83,7 @@ func (db *DBModel) GetAllMovie() ([]*Movie, error) {
 	SELECT id, title, description, year, release_date, runtime, rating, mpaa_rating, created_at, updated_at
 	FROM public.movie_entity ORDER BY title;
 	`
-	queryRows, err := db.DB.Query(ctx, queryMovie)
+	queryRows, err := db.DB.QueryContext(ctx, queryMovie)
 
 	if err != nil {
 		return nil, err
@@ -120,7 +119,11 @@ func (db *DBModel) GetAllMovie() ([]*Movie, error) {
 		WHERE mg.movie_id = $1;
 		`
 
-		genrRows, _ := db.DB.Query(ctx, queryGenre, movie.ID)
+		genrRows, err := db.DB.QueryContext(ctx, queryGenre, movie.ID)
+
+		if err != nil {
+			fmt.Printf("Error: %v\n", err)
+		}
 
 		genres := make(map[int]string)
 		for genrRows.Next() {

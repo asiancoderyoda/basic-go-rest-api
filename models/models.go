@@ -1,9 +1,8 @@
 package models
 
 import (
+	"database/sql"
 	"time"
-
-	"github.com/jackc/pgx/v4"
 )
 
 // Models is a wrapper for all the models in the database
@@ -12,7 +11,7 @@ type Models struct {
 }
 
 // NewModels returns models with db pool
-func NewModels(db *pgx.Conn) Models {
+func NewModels(db *sql.DB) Models {
 	return Models{
 		DB: DBModel{DB: db},
 	}

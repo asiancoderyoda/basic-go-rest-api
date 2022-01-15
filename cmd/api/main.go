@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"gorest/models"
@@ -10,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/jackc/pgx/v4"
+	_ "github.com/lib/pq"
 )
 
 // go run .\cmd\api\
@@ -51,7 +52,7 @@ func main() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	defer db.Close(context.Background())
+	defer db.Close()
 
 	app := &application{
 		config: cfg,
@@ -70,14 +71,13 @@ func main() {
 	logger.Printf("Starting API server on port %d in %s mode\n", cfg.port, cfg.env)
 
 	err = srv.ListenAndServe()
-
 	if err != nil {
 		log.Println(err)
 	}
 }
 
-func connectDB(cfg config) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(context.Background(), cfg.db.host)
+func connectDB(cfg config) (*sql.DB, error) {
+	conn, err := sql.Open("postgres", cfg.db.host)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +85,7 @@ func connectDB(cfg config) (*pgx.Conn, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = conn.Ping(ctx)
+	err = conn.PingContext(ctx)
 	if err != nil {
 		return nil, err
 	}
