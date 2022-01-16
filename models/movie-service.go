@@ -173,3 +173,54 @@ func (db *DBModel) GetAllGenres() ([]*Genre, error) {
 	}
 	return genres, nil
 }
+
+func (db *DBModel) DeleteMovie(id int) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	tx, err := db.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return false, err
+	}
+	defer tx.Rollback()
+
+	getMovieQuery := `
+		SELECT id, title FROM public.movie_entity WHERE id = $1;
+	`
+
+	row := tx.QueryRowContext(ctx, getMovieQuery, id)
+
+	var movie Movie
+
+	err = row.Scan(
+		&movie.ID,
+		&movie.Title,
+	)
+
+	if err != nil {
+		return false, err
+	}
+
+	queryDeleteMovie := `
+		DELETE FROM public.movie_entity WHERE id = $1;
+	`
+	_, errorDeleteMovie := db.DB.ExecContext(ctx, queryDeleteMovie, id)
+
+	if errorDeleteMovie != nil {
+		return false, err
+	}
+
+	queryDeleteMovieGenre := `
+		DELETE FROM public.movies_genres WHERE movie_id = $1;
+	`
+
+	_, errorDeleteMovieGenre := db.DB.ExecContext(ctx, queryDeleteMovieGenre, id)
+
+	if errorDeleteMovieGenre != nil {
+		return false, err
+	}
+
+	tx.Commit()
+
+	return true, nil
+}

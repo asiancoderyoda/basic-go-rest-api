@@ -81,7 +81,23 @@ func (app *application) updateMovie(wr http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) deleteMovie(wr http.ResponseWriter, r *http.Request) {
-
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		app.logger.Println(errors.New("invalid movie id " + params.ByName("id")))
+		app.writeError(wr, err)
+		return
+	}
+	success, err := app.models.DB.DeleteMovie(id)
+	if err != nil {
+		app.logger.Fatalf("Error while deleting movie: %v", err)
+		return
+	}
+	if !success {
+		app.writeError(wr, errors.New("movie not found"))
+		return
+	}
+	app.writeJSON(wr, http.StatusOK, nil, "")
 }
 
 func (app *application) searchMovies(wr http.ResponseWriter, r *http.Request) {
