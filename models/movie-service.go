@@ -81,7 +81,7 @@ func (db *DBModel) GetAllMovie(genre_ids ...int) ([]*Movie, error) {
 
 	where_clause := ""
 	if len(genre_ids) > 0 {
-		where_clause = fmt.Sprintf("WHERE id in (SELECT movie_id FROM movies_genres WHERE genre_id = %d", genre_ids[0])
+		where_clause = fmt.Sprintf("WHERE id in (SELECT movie_id FROM movies_genres WHERE genre_id = %d)", genre_ids[0])
 	}
 
 	queryMovie := fmt.Sprintf(`
