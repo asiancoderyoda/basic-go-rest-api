@@ -43,6 +43,26 @@ func (app *application) fetchAllMovies(wr http.ResponseWriter, r *http.Request) 
 	}
 }
 
+func (app *application) fetchMoviesByGenre(wr http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	genre_id, err := strconv.Atoi(params.ByName("genre_id"))
+	if err != nil {
+		app.logger.Println(errors.New("invalid movie id " + params.ByName("genre_id")))
+		app.writeError(wr, err)
+		return
+	}
+	movies, err := app.models.DB.GetAllMovie(genre_id)
+	if err != nil {
+		app.logger.Fatalf("Error while quering data: %v", err)
+		return
+	}
+	err = app.writeJSON(wr, http.StatusOK, movies, "movies")
+	if err != nil {
+		app.logger.Fatalf("Error while writing response: %v", err)
+		return
+	}
+}
+
 func (app application) fetchAllGenres(wr http.ResponseWriter, r *http.Request) {
 	genres, err := app.models.DB.GetAllGenres()
 	if err != nil {

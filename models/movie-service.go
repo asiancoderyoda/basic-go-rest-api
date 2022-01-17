@@ -75,14 +75,19 @@ func (db *DBModel) GetMovieById(id int) (*Movie, error) {
 	return &movie, nil
 }
 
-func (db *DBModel) GetAllMovie() ([]*Movie, error) {
+func (db *DBModel) GetAllMovie(genre_ids ...int) ([]*Movie, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	queryMovie := `
+	where_clause := ""
+	if len(genre_ids) > 0 {
+		where_clause = fmt.Sprintf("WHERE id in (SELECT movie_id FROM movies_genres WHERE genre_id = %d", genre_ids[0])
+	}
+
+	queryMovie := fmt.Sprintf(`
 	SELECT id, title, description, year, release_date, runtime, rating, mpaa_rating, created_at, updated_at
-	FROM public.movie_entity ORDER BY title;
-	`
+	FROM public.movie_entity %s ORDER BY title;
+	`, where_clause)
 	queryRows, err := db.DB.QueryContext(ctx, queryMovie)
 
 	if err != nil {
